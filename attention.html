@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3: The Attention Mechanism | Transformers Tutorial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">🤖 Transformers Tutorial</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="math-basics.html">Math Basics</a></li>
+                <li><a href="neural-networks.html">Neural Networks</a></li>
+                <li><a href="attention.html" class="active">Attention</a></li>
+                <li><a href="transformers.html">Transformers</a></li>
+                <li><a href="gpt-models.html">GPT Models</a></li>
+                <li><a href="playground.html">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Chapter 3: The Attention Mechanism</h1>
+            <p class="subtitle">The breakthrough that changed everything</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 51%;"></div>
+        </div>
+
+        <section class="intro">
+            <h2>The Game-Changing Innovation</h2>
+            <p>In 2017, researchers at Google published a paper titled "Attention is All You Need." This single mechanism revolutionized AI and made GPT, BERT, and modern language models possible.</p>
+            
+            <div class="concept-highlight">
+                <h4>🎯 What You'll Learn</h4>
+                <p>How attention solves the fundamental problem of understanding relationships between words, no matter how far apart they are.</p>
+            </div>
+        </section>
+
+        <section class="chapters">
+            <h2>3.1 The Problem Attention Solves</h2>
+            
+            <p>Before attention, neural networks struggled with long-range dependencies. Let's see why:</p>
+            
+            <div class="interactive-demo">
+                <h4>Example: Understanding Context</h4>
+                <p>Consider this sentence:</p>
+                <blockquote>"The cat that lived in the house with the blue door sat on the mat."</blockquote>
+                <p>Questions:</p>
+                <ul>
+                    <li>What sat on the mat? → <strong>The cat</strong></li>
+                    <li>What color was the door? → <strong>Blue</strong></li>
+                    <li>Where did the cat live? → <strong>In the house</strong></li>
+                </ul>
+                <p>Notice how you need to connect words that are far apart to understand the meaning!</p>
+            </div>
+
+            <div class="interactive-demo">
+                <h4>The Old Way: Sequential Processing</h4>
+                <p>Traditional RNNs processed words one by one:</p>
+                <div class="code-block">
+                    <pre>
+Step 1: "The" → hidden state h1
+Step 2: "cat" + h1 → hidden state h2
+Step 3: "that" + h2 → hidden state h3
+... (many steps)
+Step 12: "mat" + h11 → hidden state h12
+
+Problem: By step 12, information about "cat" might be lost!
+                    </pre>
+                </div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🔑 The Key Insight</h4>
+                <p>What if every word could directly "look at" and "pay attention to" every other word simultaneously? This is exactly what attention does!</p>
+            </div>
+
+            <h2>3.2 Attention: The Core Idea</h2>
+            
+            <p>Attention allows each word to focus on relevant words in the entire sequence. It's like having a spotlight that can illuminate the most important parts.</p>
+
+            <div class="interactive-demo">
+                <h4>Visual Example</h4>
+                <p>When processing "sat" in our sentence:</p>
+                <div class="code-block">
+                    <pre>
+"The cat that lived in the house with the blue door sat on the mat"
+
+Word: "sat" 
+Attention weights:
+- "The": 0.02 (low attention)
+- "cat": 0.85 (high attention!) ← This is the subject
+- "that": 0.01 (low attention)
+- "lived": 0.03 (low attention)
+- ...
+- "mat": 0.07 (medium attention) ← This is the object
+
+Result: "sat" focuses mostly on "cat" and "mat"
+                    </pre>
+                </div>
+            </div>
+
+            <h2>3.3 Self-Attention Step by Step</h2>
+            
+            <p>Let's implement self-attention from scratch, following the video (~65:00):</p>
+
+            <h3>Step 1: Prepare the Input</h3>
+            <div class="interactive-demo">
+                <div class="code-block">
+                    <pre>
+# Example with 3 words, each represented as 4-dimensional vectors
+Input sequence (after embeddings):
+X = [
+    [0.1, 0.2, 0.3, 0.4],  # Word 1: "The"
+    [0.5, 0.6, 0.7, 0.8],  # Word 2: "cat"  
+    [0.9, 1.0, 1.1, 1.2]   # Word 3: "sat"
+]
+
+# Shape: (sequence_length=3, embedding_dim=4)
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Step 2: Create Query, Key, and Value Matrices</h3>
+            <div class="interactive-demo">
+                <p>This is the heart of attention. We create three different "views" of each word:</p>
+                <ul>
+                    <li><strong>Query (Q):</strong> "What am I looking for?"</li>
+                    <li><strong>Key (K):</strong> "What do I offer?"</li>
+                    <li><strong>Value (V):</strong> "What information do I contain?"</li>
+                </ul>
+                <div class="code-block">
+                    <pre>
+# Weight matrices (learned during training)
+W_q = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]]  # 4x2
+W_k = [[0.2, 0.3], [0.4, 0.5], [0.6, 0.7], [0.8, 0.9]]  # 4x2  
+W_v = [[0.3, 0.4], [0.5, 0.6], [0.7, 0.8], [0.9, 1.0]]  # 4x2
+
+# Transform input
+Q = X @ W_q  # (3, 4) @ (4, 2) = (3, 2)
+K = X @ W_k  # (3, 4) @ (4, 2) = (3, 2)
+V = X @ W_v  # (3, 4) @ (4, 2) = (3, 2)
+
+# Now each word has Q, K, V representations
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Step 3: Calculate Attention Weights</h3>
+            <div class="interactive-demo">
+                <p>For each word, we calculate how much it should attend to every other word:</p>
+                <div class="code-block">
+                    <pre>
+# Step 3a: Calculate raw attention scores
+# For each query, dot product with all keys
+Attention_scores = Q @ K.T  # (3, 2) @ (2, 3) = (3, 3)
+
+# This gives us a 3x3 matrix where entry (i,j) is:
+# "How much should word i attend to word j?"
+
+# Step 3b: Apply softmax to get probabilities
+# Scale by square root of dimension for stability
+scale = sqrt(2) = 1.414
+Attention_weights = softmax(Attention_scores / scale)
+
+# Each row sums to 1.0 - it's a probability distribution!
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Step 4: Apply Attention to Values</h3>
+            <div class="interactive-demo">
+                <div class="code-block">
+                    <pre>
+# Weighted combination of values
+Output = Attention_weights @ V  # (3, 3) @ (3, 2) = (3, 2)
+
+# Each output word is now a weighted combination of all input words
+# The weights determine how much each input word contributes
+                    </pre>
+                </div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🔑 The Magic Moment</h4>
+                <p>Each word's output representation now contains information from all relevant words in the sequence. "sat" knows about "cat" and "mat", no matter how far apart they are!</p>
+            </div>
+
+            <h2>3.4 Concrete Example</h2>
+            
+            <p>Let's work through a simple example with actual numbers:</p>
+
+            <div class="interactive-demo">
+                <h4>Mini Self-Attention Example</h4>
+                <div class="code-block">
+                    <pre>
+Input: 2 words, 2 dimensions each
+X = [
+    [1, 0],  # Word 1  
+    [0, 1]   # Word 2
+]
+
+# Simple weight matrices
+W_q = W_k = W_v = [[1, 0], [0, 1]]  # Identity matrix
+
+# Step 1: Create Q, K, V
+Q = K = V = X = [[1, 0], [0, 1]]
+
+# Step 2: Attention scores
+Scores = Q @ K.T = [[1, 0], [0, 1]] @ [[1, 0], [0, 1]] = [[1, 0], [0, 1]]
+
+# Step 3: Softmax (no scaling for simplicity)
+softmax([1, 0]) = [0.73, 0.27]  # Word 1 focuses 73% on itself, 27% on word 2
+softmax([0, 1]) = [0.27, 0.73]  # Word 2 focuses 27% on word 1, 73% on itself
+
+Attention_weights = [
+    [0.73, 0.27],
+    [0.27, 0.73]
+]
+
+# Step 4: Apply to values
+Output = Attention_weights @ V = [
+    [0.73, 0.27],  # Word 1 output (mostly itself, some word 2)
+    [0.27, 0.73]   # Word 2 output (mostly itself, some word 1)
+]
+                    </pre>
+                </div>
+            </div>
+
+            <h2>3.5 Why It Works So Well</h2>
+            
+            <div class="interactive-demo">
+                <h4>Attention Properties</h4>
+                <ul>
+                    <li><strong>Parallel Processing:</strong> All words processed simultaneously</li>
+                    <li><strong>Long-range Dependencies:</strong> Any word can attend to any other word</li>
+                    <li><strong>Flexible Focus:</strong> Attention weights are learned, not fixed</li>
+                    <li><strong>Interpretable:</strong> We can visualize what the model is focusing on</li>
+                </ul>
+            </div>
+
+            <h3>Attention vs Traditional Methods</h3>
+            <div class="interactive-demo">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Method</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Processing</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Memory</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Parallelization</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">RNN</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Sequential</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Forgetting</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Low</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Attention</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Parallel</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Direct access</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">High</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2>3.6 Masked Self-Attention (For GPT)</h2>
+            
+            <p>GPT uses a special type of attention called "masked self-attention" because it generates text left-to-right:</p>
+
+            <div class="interactive-demo">
+                <h4>The Masking Principle</h4>
+                <p>When predicting the next word, the model can only look at previous words, not future ones:</p>
+                <div class="code-block">
+                    <pre>
+Sequence: "The cat sat on"
+Predicting: "the"
+
+✓ Can attend to: "The", "cat", "sat", "on"
+✗ Cannot attend to: future words (they don't exist yet!)
+
+This is implemented by masking the attention matrix:
+Before masking:
+[[0.25, 0.25, 0.25, 0.25],
+ [0.25, 0.25, 0.25, 0.25],
+ [0.25, 0.25, 0.25, 0.25],
+ [0.25, 0.25, 0.25, 0.25]]
+
+After masking:
+[[1.00, 0.00, 0.00, 0.00],
+ [0.50, 0.50, 0.00, 0.00],
+ [0.33, 0.33, 0.33, 0.00],
+ [0.25, 0.25, 0.25, 0.25]]
+
+Each word can only attend to itself and previous words!
+                    </pre>
+                </div>
+            </div>
+
+            <h2>3.7 Multi-Head Attention (Preview)</h2>
+            
+            <p>Instead of just one attention mechanism, transformers use multiple "heads" that focus on different aspects:</p>
+
+            <div class="interactive-demo">
+                <h4>Multiple Perspectives</h4>
+                <p>Imagine analyzing the sentence "The cat sat on the mat":</p>
+                <ul>
+                    <li><strong>Head 1:</strong> Focuses on subject-verb relationships ("cat" → "sat")</li>
+                    <li><strong>Head 2:</strong> Focuses on prepositions ("sat" → "on" → "mat")</li>
+                    <li><strong>Head 3:</strong> Focuses on determiners ("the" → "cat", "the" → "mat")</li>
+                </ul>
+                <p>Each head learns different patterns, then their outputs are combined!</p>
+            </div>
+
+            <h2>3.8 Attention Visualization</h2>
+            
+            <div class="interactive-demo">
+                <h4>What Attention Looks Like</h4>
+                <p>Here's a visualization of attention weights for "The cat sat on the mat":</p>
+                <div class="code-block">
+                    <pre>
+       The   cat   sat   on   the   mat
+The   [0.8] [0.1] [0.0] [0.0] [0.1] [0.0]
+cat   [0.1] [0.7] [0.2] [0.0] [0.0] [0.0]
+sat   [0.0] [0.6] [0.3] [0.1] [0.0] [0.0]
+on    [0.0] [0.0] [0.2] [0.5] [0.0] [0.3]
+the   [0.1] [0.0] [0.0] [0.0] [0.6] [0.3]
+mat   [0.0] [0.0] [0.0] [0.1] [0.2] [0.7]
+
+Reading: "sat" pays 60% attention to "cat" and 30% to itself
+                    </pre>
+                </div>
+            </div>
+
+            <h2>3.9 Practice Exercise</h2>
+            
+            <div class="interactive-demo">
+                <h4>Exercise: Manual Attention</h4>
+                <p>Given this simplified setup:</p>
+                <div class="code-block">
+                    <pre>
+Q = [[2, 0], [0, 2]]  # 2 words, 2 dimensions
+K = [[1, 0], [0, 1]]
+
+Step 1: Calculate attention scores
+Scores = Q @ K.T = ?
+
+Step 2: Apply softmax to each row
+Attention_weights = ?
+                    </pre>
+                </div>
+                <details>
+                    <summary>Click for answer</summary>
+                    <div class="code-block">
+                        <pre>
+Step 1: Scores = [[2, 0], [0, 2]] @ [[1, 0], [0, 1]] = [[2, 0], [0, 2]]
+
+Step 2: Softmax
+Row 1: softmax([2, 0]) = [0.88, 0.12]
+Row 2: softmax([0, 2]) = [0.12, 0.88]
+
+Attention_weights = [[0.88, 0.12], [0.12, 0.88]]
+
+Interpretation:
+- Word 1 focuses 88% on itself, 12% on word 2
+- Word 2 focuses 12% on word 1, 88% on itself
+                        </pre>
+                    </div>
+                </details>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🎉 You've Mastered Attention!</h4>
+                <p>You now understand the core mechanism that powers all modern language models. Next, we'll see how attention is used in the complete transformer architecture.</p>
+            </div>
+        </section>
+
+        <div class="chapter-nav">
+            <a href="neural-networks.html" class="nav-button prev">← Previous: Neural Networks</a>
+            <a href="transformers.html" class="nav-button next">Next: Transformer Architecture →</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Chapter 3 of 5 | The Attention Mechanism</p>
+    </footer>
+
+    <script>
+        // Render math equations
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

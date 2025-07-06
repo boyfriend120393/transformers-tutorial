@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: GPT and Language Models | Transformers Tutorial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">🤖 Transformers Tutorial</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="math-basics.html">Math Basics</a></li>
+                <li><a href="neural-networks.html">Neural Networks</a></li>
+                <li><a href="attention.html">Attention</a></li>
+                <li><a href="transformers.html">Transformers</a></li>
+                <li><a href="gpt-models.html" class="active">GPT Models</a></li>
+                <li><a href="playground.html">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Chapter 5: GPT and Language Models</h1>
+            <p class="subtitle">From transformers to ChatGPT</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 85%;"></div>
+        </div>
+
+        <section class="intro">
+            <h2>The Power of Language Modeling</h2>
+            <p>Now we'll see how transformers are trained on massive amounts of text to create powerful language models like GPT. This is where everything comes together!</p>
+            
+            <div class="concept-highlight">
+                <h4>🎯 What You'll Learn</h4>
+                <p>How GPT is trained, how it generates text, and why it seems to "understand" language so well.</p>
+            </div>
+        </section>
+
+        <section class="chapters">
+            <h2>5.1 What is a Language Model?</h2>
+            
+            <p>A language model learns to predict the probability of the next word given the previous words:</p>
+            
+            <div class="interactive-demo">
+                <h4>The Core Task</h4>
+                <p>Given: "The cat sat on the"</p>
+                <p>Predict probabilities for next word:</p>
+                <ul>
+                    <li>"mat": 0.4 (40% probability)</li>
+                    <li>"floor": 0.3 (30% probability)</li>
+                    <li>"chair": 0.2 (20% probability)</li>
+                    <li>"dog": 0.01 (1% probability)</li>
+                    <li>All other words: remaining probability</li>
+                </ul>
+                <p>The model learns these probabilities from seeing millions of examples!</p>
+            </div>
+
+            <h3>Autoregressive Generation</h3>
+            <div class="interactive-demo">
+                <h4>How GPT Generates Text</h4>
+                <div class="code-block">
+                    <pre>
+Step 1: Start with prompt: "The weather is"
+Step 2: Model predicts: "nice" (highest probability)  
+Step 3: Input becomes: "The weather is nice"
+Step 4: Model predicts: "today" 
+Step 5: Input becomes: "The weather is nice today"
+Step 6: Model predicts: "."
+Step 7: Final output: "The weather is nice today."
+
+Each prediction uses the entire history!
+                    </pre>
+                </div>
+            </div>
+
+            <h2>5.2 Training Data and Tokenization</h2>
+            
+            <p>Before training, we need to convert text into numbers that the model can process:</p>
+
+            <h3>Tokenization (From Video ~10:00)</h3>
+            <div class="interactive-demo">
+                <h4>From Text to Tokens</h4>
+                <div class="code-block">
+                    <pre>
+# Step 1: Collect all unique characters/subwords
+text = "Hello world! How are you?"
+
+# Character-level (simple but inefficient)
+chars = ['H', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!', ...]
+vocab = {char: i for i, char in enumerate(sorted(set(chars)))}
+
+# Result: {'!': 0, ' ': 1, 'H': 2, 'a': 3, 'e': 4, ...}
+
+# Tokenize: "Hello" → [2, 4, 11, 11, 14]  # H, e, l, l, o
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Byte Pair Encoding (BPE) - Used in GPT</h3>
+            <div class="interactive-demo">
+                <h4>Smarter Tokenization</h4>
+                <p>BPE creates subword tokens that balance efficiency and meaning:</p>
+                <div class="code-block">
+                    <pre>
+# Common subwords get their own tokens
+Examples:
+"running" → ["run", "ning"]  # 2 tokens instead of 7 characters
+"the" → ["the"]              # 1 token (very common word)
+"unbelievable" → ["un", "believ", "able"]  # 3 meaningful parts
+
+Advantages:
+- Smaller vocabulary than character-level
+- Handles rare words better than word-level  
+- Captures morphology (prefixes, suffixes)
+                    </pre>
+                </div>
+            </div>
+
+            <h2>5.3 Training Objective: Next Token Prediction</h2>
+            
+            <p>GPT is trained with a simple but powerful objective: predict the next token.</p>
+
+            <div class="interactive-demo">
+                <h4>Training Example</h4>
+                <div class="code-block">
+                    <pre>
+Input text: "The cat sat on the mat"
+Tokens: [18, 47, 56, 57, 18, 58]
+
+Training pairs:
+Input: [18]           → Target: 47   (predict "cat" after "The")
+Input: [18, 47]       → Target: 56   (predict "sat" after "The cat")  
+Input: [18, 47, 56]   → Target: 57   (predict "on" after "The cat sat")
+Input: [18, 47, 56, 57] → Target: 18 (predict "the" after "The cat sat on")
+Input: [18, 47, 56, 57, 18] → Target: 58 (predict "mat" after "The cat sat on the")
+
+One sentence gives us 5 training examples!
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Loss Function</h3>
+            <div class="interactive-demo">
+                <div class="code-block">
+                    <pre>
+# Cross-entropy loss for next token prediction
+def compute_loss(model, input_tokens, target_tokens):
+    # Forward pass
+    logits = model(input_tokens)  # Shape: (batch, seq_len, vocab_size)
+    
+    # Apply softmax to get probabilities
+    probs = softmax(logits, dim=-1)
+    
+    # Calculate loss for each position
+    loss = 0
+    for pos in range(len(target_tokens)):
+        target_token = target_tokens[pos]
+        predicted_prob = probs[pos, target_token]
+        loss += -log(predicted_prob)  # Cross-entropy
+    
+    return loss / len(target_tokens)  # Average loss
+
+# The model learns by minimizing this loss across millions of examples
+                    </pre>
+                </div>
+            </div>
+
+            <h2>5.4 Emergent Abilities</h2>
+            
+            <p>Amazingly, by just learning to predict the next token, GPT develops many capabilities:</p>
+
+            <div class="interactive-demo">
+                <h4>What GPT Learns "For Free"</h4>
+                <ul>
+                    <li><strong>Grammar:</strong> Correct sentence structure</li>
+                    <li><strong>Facts:</strong> World knowledge from training data</li>
+                    <li><strong>Reasoning:</strong> Step-by-step problem solving</li>
+                    <li><strong>Translation:</strong> Language patterns across different languages</li>
+                    <li><strong>Summarization:</strong> Identifying key information</li>
+                    <li><strong>Code:</strong> Programming patterns and syntax</li>
+                </ul>
+                <p>All from next-token prediction!</p>
+            </div>
+
+            <h3>Why This Works</h3>
+            <div class="concept-highlight">
+                <h4>🔑 The Key Insight</h4>
+                <p>To predict the next word accurately, the model must understand:</p>
+                <ul>
+                    <li>What entities are being discussed</li>
+                    <li>Their relationships and properties</li>
+                    <li>The context and situation</li>
+                    <li>Logical consistency</li>
+                </ul>
+                <p>Understanding emerges from the prediction task!</p>
+            </div>
+
+            <h2>5.5 Sampling and Generation</h2>
+            
+            <p>When generating text, we don't always pick the highest probability word:</p>
+
+            <h3>Sampling Strategies</h3>
+            <div class="interactive-demo">
+                <h4>1. Greedy Sampling</h4>
+                <p>Always pick the highest probability token:</p>
+                <div class="code-block">
+                    <pre>
+Probabilities: {"the": 0.4, "a": 0.3, "my": 0.2, "this": 0.1}
+Greedy choice: "the" (always picks 0.4)
+
+Result: Deterministic but potentially repetitive
+                    </pre>
+                </div>
+
+                <h4>2. Temperature Sampling</h4>
+                <p>Add randomness by adjusting the probability distribution:</p>
+                <div class="code-block">
+                    <pre>
+# Original logits: [2.0, 1.0, 0.5, 0.1]
+# Temperature = 0.5 (more focused)
+adjusted_logits = [4.0, 2.0, 1.0, 0.2]
+# Softmax: [0.73, 0.20, 0.05, 0.02] → More peaked
+
+# Temperature = 2.0 (more random)  
+adjusted_logits = [1.0, 0.5, 0.25, 0.05]
+# Softmax: [0.42, 0.31, 0.18, 0.09] → Flatter
+
+Lower temperature → More focused, less creative
+Higher temperature → More random, more creative
+                    </pre>
+                </div>
+
+                <h4>3. Top-k and Top-p Sampling</h4>
+                <div class="code-block">
+                    <pre>
+# Top-k: Only consider top k most likely tokens
+top_k = 3
+probabilities = {"the": 0.4, "a": 0.3, "my": 0.2, "this": 0.1}
+filtered = {"the": 0.4, "a": 0.3, "my": 0.2}  # Remove "this"
+renormalized = {"the": 0.44, "a": 0.33, "my": 0.22}
+
+# Top-p (nucleus): Consider tokens until cumulative prob > p  
+top_p = 0.8
+cumulative = {"the": 0.4, "a": 0.7, "my": 0.9}  # Stop at "my"
+filtered = {"the": 0.4, "a": 0.3, "my": 0.2}
+                    </pre>
+                </div>
+            </div>
+
+            <h2>5.6 GPT Training Process</h2>
+            
+            <div class="interactive-demo">
+                <h4>Training Pipeline</h4>
+                <ol>
+                    <li><strong>Data Collection:</strong> Scrape billions of web pages, books, articles</li>
+                    <li><strong>Data Cleaning:</strong> Remove low-quality content, duplicates</li>
+                    <li><strong>Tokenization:</strong> Convert text to tokens using BPE</li>
+                    <li><strong>Model Training:</strong> Train transformer to predict next tokens</li>
+                    <li><strong>Fine-tuning:</strong> Additional training on high-quality data</li>
+                    <li><strong>RLHF:</strong> Reinforcement Learning from Human Feedback</li>
+                </ol>
+            </div>
+
+            <h3>Scale Requirements</h3>
+            <div class="interactive-demo">
+                <h4>GPT-3 Training Details</h4>
+                <ul>
+                    <li><strong>Data:</strong> ~500B tokens (45TB of text)</li>
+                    <li><strong>Parameters:</strong> 175B parameters</li>
+                    <li><strong>Compute:</strong> ~3,640 petaflop-days</li>
+                    <li><strong>Cost:</strong> Estimated $4-12 million</li>
+                    <li><strong>Time:</strong> Several months on thousands of GPUs</li>
+                </ul>
+            </div>
+
+            <h2>5.7 From GPT to ChatGPT</h2>
+            
+            <p>ChatGPT adds additional training steps to make GPT more helpful and safe:</p>
+
+            <div class="interactive-demo">
+                <h4>Three-Step Process</h4>
+                
+                <p><strong>Step 1: Pre-training (Base GPT)</strong></p>
+                <div class="code-block">
+                    <pre>
+# Standard next-token prediction on internet text
+# Result: Model that can continue any text, but not specifically helpful
+                    </pre>
+                </div>
+
+                <p><strong>Step 2: Supervised Fine-tuning (SFT)</strong></p>
+                <div class="code-block">
+                    <pre>
+# Train on high-quality question-answer pairs
+Input: "How do I bake a cake?"
+Target: "Here's a step-by-step guide to baking a cake..."
+
+# Result: Model learns to be helpful and follow instructions
+                    </pre>
+                </div>
+
+                <p><strong>Step 3: Reinforcement Learning from Human Feedback (RLHF)</strong></p>
+                <div class="code-block">
+                    <pre>
+# Humans rank model outputs from best to worst
+# Model learns to generate responses humans prefer
+# Result: More helpful, harmless, and honest responses
+                    </pre>
+                </div>
+            </div>
+
+            <h2>5.8 Capabilities and Limitations</h2>
+            
+            <div class="interactive-demo">
+                <h4>What GPT Can Do</h4>
+                <ul>
+                    <li>Generate coherent, contextual text</li>
+                    <li>Answer questions across many domains</li>
+                    <li>Write code in multiple programming languages</li>
+                    <li>Translate between languages</li>
+                    <li>Summarize long documents</li>
+                    <li>Engage in conversations</li>
+                    <li>Help with creative writing</li>
+                </ul>
+            </div>
+
+            <div class="interactive-demo">
+                <h4>Current Limitations</h4>
+                <ul>
+                    <li>No access to real-time information</li>
+                    <li>Can generate plausible but incorrect information</li>
+                    <li>Struggles with very long contexts</li>
+                    <li>No persistent memory across conversations</li>
+                    <li>Can be biased based on training data</li>
+                    <li>Doesn't truly "understand" - it's pattern matching</li>
+                </ul>
+            </div>
+
+            <h2>5.9 The Future of Language Models</h2>
+            
+            <div class="interactive-demo">
+                <h4>Current Trends</h4>
+                <ul>
+                    <li><strong>Scaling:</strong> Larger models (GPT-4, PaLM, etc.)</li>
+                    <li><strong>Efficiency:</strong> Better performance with fewer parameters</li>
+                    <li><strong>Multimodality:</strong> Text + images + audio</li>
+                    <li><strong>Specialization:</strong> Domain-specific models</li>
+                    <li><strong>Safety:</strong> More aligned and controllable models</li>
+                </ul>
+            </div>
+
+            <h2>5.10 Building Your Own GPT</h2>
+            
+            <div class="interactive-demo">
+                <h4>Steps to Train a Mini-GPT</h4>
+                <div class="code-block">
+                    <pre>
+# 1. Prepare data
+text = "Your training text here..."
+tokens = tokenizer.encode(text)
+
+# 2. Create training examples  
+def create_examples(tokens, seq_len):
+    examples = []
+    for i in range(len(tokens) - seq_len):
+        input_seq = tokens[i:i+seq_len]
+        target_seq = tokens[i+1:i+seq_len+1]
+        examples.append((input_seq, target_seq))
+    return examples
+
+# 3. Train the model
+model = MiniGPT(vocab_size=1000, d_model=256, n_heads=4, n_layers=6)
+optimizer = Adam(model.parameters())
+
+for epoch in range(100):
+    for input_seq, target_seq in dataloader:
+        # Forward pass
+        logits = model(input_seq)
+        loss = cross_entropy(logits, target_seq)
+        
+        # Backward pass
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+# 4. Generate text
+def generate(model, prompt, max_length=100):
+    tokens = tokenizer.encode(prompt)
+    
+    for _ in range(max_length):
+        logits = model(tokens)
+        next_token = sample(logits[-1])  # Sample from last position
+        tokens.append(next_token)
+        
+        if next_token == END_TOKEN:
+            break
+    
+    return tokenizer.decode(tokens)
+                    </pre>
+                </div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🎉 Congratulations!</h4>
+                <p>You now understand transformers from the ground up! From basic math to the complete GPT architecture. You're ready to dive deeper into AI and maybe even build your own language models!</p>
+            </div>
+
+            <h2>5.11 Next Steps</h2>
+            
+            <div class="interactive-demo">
+                <h4>Continue Your Journey</h4>
+                <ul>
+                    <li><strong>Code:</strong> Implement a transformer from scratch</li>
+                    <li><strong>Experiment:</strong> Try the interactive playground</li>
+                    <li><strong>Read Papers:</strong> "Attention Is All You Need", GPT papers</li>
+                    <li><strong>Practice:</strong> Fine-tune models on specific tasks</li>
+                    <li><strong>Explore:</strong> Other architectures (BERT, T5, etc.)</li>
+                    <li><strong>Stay Updated:</strong> Follow AI research and developments</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="chapter-nav">
+            <a href="transformers.html" class="nav-button prev">← Previous: Transformer Architecture</a>
+            <a href="playground.html" class="nav-button next">Next: Interactive Playground →</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Chapter 5 of 5 | GPT and Language Models</p>
+    </footer>
+
+    <script>
+        // Render math equations
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

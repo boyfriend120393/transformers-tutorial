@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: Neural Network Basics | Transformers Tutorial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">🤖 Transformers Tutorial</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="math-basics.html">Math Basics</a></li>
+                <li><a href="neural-networks.html" class="active">Neural Networks</a></li>
+                <li><a href="attention.html">Attention</a></li>
+                <li><a href="transformers.html">Transformers</a></li>
+                <li><a href="gpt-models.html">GPT Models</a></li>
+                <li><a href="playground.html">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Chapter 2: Neural Network Basics</h1>
+            <p class="subtitle">From single neurons to deep networks</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 34%;"></div>
+        </div>
+
+        <section class="intro">
+            <h2>Building Intelligence with Math</h2>
+            <p>Now that you understand the math, let's see how these operations combine to create artificial intelligence. We'll build from a single neuron to the networks that power GPT.</p>
+            
+            <div class="concept-highlight">
+                <h4>🎯 What You'll Learn</h4>
+                <p>How matrix operations create networks that can learn patterns, make predictions, and eventually understand language.</p>
+            </div>
+        </section>
+
+        <section class="chapters">
+            <h2>2.1 What is a Neuron?</h2>
+            
+            <p>A neuron is the basic building block of neural networks. It's surprisingly simple - just a function that takes inputs, processes them, and produces an output.</p>
+            
+            <div class="interactive-demo">
+                <h4>Biological Inspiration</h4>
+                <p>Real neurons in your brain:</p>
+                <ul>
+                    <li>Receive signals from other neurons</li>
+                    <li>Process these signals</li>
+                    <li>Send output to other neurons</li>
+                </ul>
+                <p>Artificial neurons work the same way!</p>
+            </div>
+
+            <h3>Mathematical Definition</h3>
+            <p>A neuron performs this calculation:</p>
+            <div class="code-block">
+                <pre>
+output = activation_function(sum of (input × weight) + bias)
+
+For example:
+inputs = [0.5, 0.3, 0.8]
+weights = [0.2, 0.7, 0.1]
+bias = 0.1
+
+weighted_sum = (0.5×0.2) + (0.3×0.7) + (0.8×0.1) + 0.1
+             = 0.1 + 0.21 + 0.08 + 0.1 = 0.49
+
+output = activation_function(0.49)
+                </pre>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🔑 Key Insight</h4>
+                <p>This is just a dot product (from Chapter 1) plus a bias term! The neuron learns by adjusting its weights and bias.</p>
+            </div>
+
+            <h2>2.2 Activation Functions</h2>
+            
+            <p>Activation functions add non-linearity to neurons. Without them, no matter how many layers you stack, you'd just have a linear function.</p>
+
+            <h3>Common Activation Functions</h3>
+            
+            <h4>1. ReLU (Rectified Linear Unit)</h4>
+            <div class="interactive-demo">
+                <p><strong>Rule:</strong> If input > 0, output = input. Otherwise, output = 0.</p>
+                <div class="code-block">
+                    <pre>
+def relu(x):
+    return max(0, x)
+
+Examples:
+relu(0.5) = 0.5
+relu(-0.3) = 0
+relu(2.1) = 2.1
+                    </pre>
+                </div>
+                <p><strong>Why it's popular:</strong> Simple, fast, and helps with the "vanishing gradient" problem.</p>
+            </div>
+
+            <h4>2. Softmax (Used in GPT for predictions)</h4>
+            <div class="interactive-demo">
+                <p><strong>Rule:</strong> Converts a vector of numbers into probabilities that sum to 1.</p>
+                <div class="code-block">
+                    <pre>
+Input: [2.0, 1.0, 0.1]
+
+Step 1: Exponentiate each number
+exp([2.0, 1.0, 0.1]) = [7.39, 2.72, 1.10]
+
+Step 2: Divide by sum
+Sum = 7.39 + 2.72 + 1.10 = 11.21
+Softmax = [7.39/11.21, 2.72/11.21, 1.10/11.21]
+        = [0.66, 0.24, 0.10]
+
+Notice: 0.66 + 0.24 + 0.10 = 1.00 ✓
+                    </pre>
+                </div>
+                <p><strong>In GPT:</strong> Softmax converts the final layer outputs into probabilities for each possible next word.</p>
+            </div>
+
+            <h2>2.3 Layers and Forward Propagation</h2>
+            
+            <p>Multiple neurons working together form a layer. Let's see how information flows through a network.</p>
+
+            <div class="interactive-demo">
+                <h4>Example: Simple Network</h4>
+                <p>Let's trace through a network with 2 inputs, 1 hidden layer (3 neurons), and 1 output:</p>
+                <div class="code-block">
+                    <pre>
+Input Layer: [0.5, 0.3]
+
+Hidden Layer Weights:
+Neuron 1: [0.2, 0.7], bias = 0.1
+Neuron 2: [0.1, 0.4], bias = 0.2  
+Neuron 3: [0.6, 0.3], bias = 0.0
+
+Hidden Layer Calculations:
+Neuron 1: (0.5×0.2) + (0.3×0.7) + 0.1 = 0.42
+Neuron 2: (0.5×0.1) + (0.3×0.4) + 0.2 = 0.37
+Neuron 3: (0.5×0.6) + (0.3×0.3) + 0.0 = 0.39
+
+After ReLU: [0.42, 0.37, 0.39]
+
+Output Layer:
+Weight: [0.5, 0.3, 0.2], bias = 0.1
+Output: (0.42×0.5) + (0.37×0.3) + (0.39×0.2) + 0.1 = 0.499
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Matrix Form (The Efficient Way)</h3>
+            <p>Instead of calculating each neuron separately, we use matrix multiplication:</p>
+            <div class="code-block">
+                <pre>
+# Input
+X = [0.5, 0.3]
+
+# Hidden layer weights (3 neurons, 2 inputs each)
+W1 = [
+    [0.2, 0.7],  # Neuron 1 weights
+    [0.1, 0.4],  # Neuron 2 weights
+    [0.6, 0.3]   # Neuron 3 weights
+]
+b1 = [0.1, 0.2, 0.0]
+
+# Hidden layer computation
+H = ReLU(X @ W1.T + b1) = ReLU([0.42, 0.37, 0.39]) = [0.42, 0.37, 0.39]
+
+# Output layer
+W2 = [0.5, 0.3, 0.2]
+b2 = 0.1
+Output = H @ W2 + b2 = 0.499
+                </pre>
+            </div>
+
+            <h2>2.4 Embeddings: From Words to Vectors</h2>
+            
+            <p>Before we can process text, we need to convert words into vectors. This is where embeddings come in.</p>
+
+            <div class="interactive-demo">
+                <h4>Tokenization (From Video ~10:00)</h4>
+                <p>First, we convert text into tokens (numbers):</p>
+                <div class="code-block">
+                    <pre>
+Text: "Hi there"
+Vocabulary: {"Hi": 18, "there": 47, "!": 1, "the": 8, ...}
+
+Tokenization:
+"Hi there" → [18, 47]
+                    </pre>
+                </div>
+            </div>
+
+            <div class="interactive-demo">
+                <h4>Embedding Layer</h4>
+                <p>Then we convert tokens to vectors using an embedding table:</p>
+                <div class="code-block">
+                    <pre>
+# Embedding table (vocab_size × embedding_dim)
+# Each row represents one word
+embedding_table = [
+    [0.1, 0.2, 0.3, 0.4],  # Word 0
+    [0.5, 0.6, 0.7, 0.8],  # Word 1
+    ...
+    [0.2, -0.1, 0.8, 0.3], # Word 18 ("Hi")
+    [0.1, -0.2, 0.7, 0.4], # Word 47 ("there")
+    ...
+]
+
+# Convert tokens to embeddings
+tokens = [18, 47]
+embeddings = [
+    [0.2, -0.1, 0.8, 0.3],  # "Hi"
+    [0.1, -0.2, 0.7, 0.4]   # "there"
+]
+                    </pre>
+                </div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🔑 Key Insight</h4>
+                <p>The embedding table is learned during training. Similar words end up with similar vectors because they appear in similar contexts.</p>
+            </div>
+
+            <h2>2.5 Loss Functions and Training</h2>
+            
+            <p>How does the network learn? By minimizing a loss function that measures how wrong its predictions are.</p>
+
+            <h3>Cross-Entropy Loss (Used in GPT)</h3>
+            <div class="interactive-demo">
+                <h4>Example: Next Word Prediction</h4>
+                <p>Given "The cat sat on the", predict the next word:</p>
+                <div class="code-block">
+                    <pre>
+Model predictions (after softmax):
+"mat": 0.6
+"floor": 0.3  
+"chair": 0.1
+
+Correct answer: "mat"
+
+Cross-entropy loss = -log(probability of correct answer)
+                   = -log(0.6)
+                   = 0.51
+
+If the model predicted "floor" (wrong):
+Loss = -log(0.3) = 1.20 (higher = worse)
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Backpropagation</h3>
+            <p>The network learns by:</p>
+            <ol>
+                <li><strong>Forward pass:</strong> Calculate prediction and loss</li>
+                <li><strong>Backward pass:</strong> Calculate gradients (how to change weights)</li>
+                <li><strong>Update:</strong> Adjust weights to reduce loss</li>
+                <li><strong>Repeat:</strong> Do this millions of times</li>
+            </ol>
+
+            <h2>2.6 From Simple Networks to Transformers</h2>
+            
+            <p>Now let's see how these concepts build toward transformers:</p>
+
+            <div class="interactive-demo">
+                <h4>Traditional RNN Approach</h4>
+                <p>Before transformers, we processed sequences one word at a time:</p>
+                <div class="code-block">
+                    <pre>
+Input: "The cat sat"
+
+Step 1: Process "The" → hidden state h1
+Step 2: Process "cat" + h1 → hidden state h2  
+Step 3: Process "sat" + h2 → hidden state h3
+Step 4: Use h3 to predict next word
+
+Problem: Information from "The" might be lost by step 3!
+                    </pre>
+                </div>
+            </div>
+
+            <div class="interactive-demo">
+                <h4>Transformer Approach</h4>
+                <p>Transformers process all words simultaneously:</p>
+                <div class="code-block">
+                    <pre>
+Input: "The cat sat"
+
+Step 1: Convert all words to embeddings
+Step 2: Let each word "attend" to all other words
+Step 3: Each word gets updated based on relevant context
+Step 4: Predict next word using updated representations
+
+Advantage: "The" can directly influence prediction of the next word!
+                    </pre>
+                </div>
+            </div>
+
+            <h2>2.7 Batch Processing</h2>
+            
+            <p>For efficiency, we process multiple examples at once (from video ~18:00):</p>
+
+            <div class="interactive-demo">
+                <h4>Batch Example</h4>
+                <div class="code-block">
+                    <pre>
+# Instead of processing one sequence at a time:
+sequence_1 = "The cat sat"
+sequence_2 = "A dog ran"
+sequence_3 = "Birds can fly"
+
+# We stack them into a batch:
+batch = [
+    [18, 47, 56],  # "The cat sat"
+    [23, 12, 34],  # "A dog ran"  
+    [89, 45, 67]   # "Birds can fly"
+]
+
+# Shape: (batch_size=3, sequence_length=3)
+# All sequences processed in parallel!
+                    </pre>
+                </div>
+            </div>
+
+            <h2>2.8 Practice Exercises</h2>
+            
+            <div class="interactive-demo">
+                <h4>Exercise 1: Neuron Calculation</h4>
+                <p>Calculate the output of a neuron with:</p>
+                <ul>
+                    <li>Inputs: [0.8, 0.2]</li>
+                    <li>Weights: [0.5, 0.3]</li>
+                    <li>Bias: 0.1</li>
+                    <li>Activation: ReLU</li>
+                </ul>
+                <details>
+                    <summary>Click for answer</summary>
+                    <p>Weighted sum = (0.8×0.5) + (0.2×0.3) + 0.1 = 0.4 + 0.06 + 0.1 = 0.56</p>
+                    <p>ReLU(0.56) = 0.56 (since 0.56 > 0)</p>
+                </details>
+            </div>
+
+            <div class="interactive-demo">
+                <h4>Exercise 2: Softmax</h4>
+                <p>Convert [1.0, 2.0, 3.0] to probabilities using softmax:</p>
+                <details>
+                    <summary>Click for answer</summary>
+                    <div class="code-block">
+                        <pre>
+Step 1: Exponentiate
+exp([1.0, 2.0, 3.0]) = [2.72, 7.39, 20.09]
+
+Step 2: Sum = 2.72 + 7.39 + 20.09 = 30.20
+
+Step 3: Normalize
+[2.72/30.20, 7.39/30.20, 20.09/30.20] = [0.09, 0.24, 0.67]
+                        </pre>
+                    </div>
+                </details>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🎉 Chapter Complete!</h4>
+                <p>You now understand how neural networks work! In the next chapter, we'll discover the attention mechanism that makes transformers so powerful.</p>
+            </div>
+        </section>
+
+        <div class="chapter-nav">
+            <a href="math-basics.html" class="nav-button prev">← Previous: Math Basics</a>
+            <a href="attention.html" class="nav-button next">Next: Attention Mechanism →</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Chapter 2 of 5 | Neural Network Basics</p>
+    </footer>
+
+    <script>
+        // Render math equations
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

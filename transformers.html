@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4: Transformer Architecture | Transformers Tutorial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">🤖 Transformers Tutorial</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="math-basics.html">Math Basics</a></li>
+                <li><a href="neural-networks.html">Neural Networks</a></li>
+                <li><a href="attention.html">Attention</a></li>
+                <li><a href="transformers.html" class="active">Transformers</a></li>
+                <li><a href="gpt-models.html">GPT Models</a></li>
+                <li><a href="playground.html">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Chapter 4: Transformer Architecture</h1>
+            <p class="subtitle">Putting it all together</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 68%;"></div>
+        </div>
+
+        <section class="intro">
+            <h2>The Complete Picture</h2>
+            <p>Now that you understand attention, let's see how it fits into the complete transformer architecture. We'll build a transformer from the ground up, component by component.</p>
+            
+            <div class="concept-highlight">
+                <h4>🎯 What You'll Learn</h4>
+                <p>The complete transformer architecture: multi-head attention, position encodings, layer normalization, and feed-forward networks.</p>
+            </div>
+        </section>
+
+        <section class="chapters">
+            <h2>4.1 Transformer Overview</h2>
+            
+            <p>The transformer has several key components working together:</p>
+            
+            <div class="interactive-demo">
+                <h4>Transformer Block Structure</h4>
+                <div class="code-block">
+                    <pre>
+Input → Embeddings + Positional Encoding
+         ↓
+    Multi-Head Attention
+         ↓
+    Add & Layer Norm
+         ↓
+    Feed Forward Network  
+         ↓
+    Add & Layer Norm
+         ↓
+    Output (to next block or final layer)
+                    </pre>
+                </div>
+                <p>This pattern repeats multiple times (e.g., 12 blocks in GPT-1, 96 blocks in GPT-3)</p>
+            </div>
+
+            <h2>4.2 Positional Encoding</h2>
+            
+            <p>Since attention processes all words simultaneously, we need to tell the model about word order:</p>
+
+            <div class="interactive-demo">
+                <h4>The Position Problem</h4>
+                <p>Without positional information:</p>
+                <ul>
+                    <li>"The cat sat on the mat" and "Mat the on sat cat the" would look identical!</li>
+                    <li>Word order carries crucial meaning in language</li>
+                </ul>
+            </div>
+
+            <h3>Learned vs Fixed Positional Encodings</h3>
+            <div class="interactive-demo">
+                <h4>Two Approaches</h4>
+                <p><strong>Learned Positional Embeddings (used in GPT):</strong></p>
+                <div class="code-block">
+                    <pre>
+# Each position gets a learnable vector
+position_embeddings = [
+    [0.1, 0.2, 0.3, 0.4],  # Position 0
+    [0.5, 0.6, 0.7, 0.8],  # Position 1  
+    [0.9, 1.0, 1.1, 1.2],  # Position 2
+    # ... up to max_sequence_length
+]
+
+# Add to word embeddings
+word_embedding = [0.2, 0.4, 0.6, 0.8]     # "cat"
+position_embedding = [0.5, 0.6, 0.7, 0.8]  # Position 1
+final_embedding = [0.7, 1.0, 1.3, 1.6]     # word + position
+                    </pre>
+                </div>
+
+                <p><strong>Sinusoidal Encodings (original transformer paper):</strong></p>
+                <div class="code-block">
+                    <pre>
+# Mathematical formula for each position and dimension
+PE(pos, 2i) = sin(pos / 10000^(2i/d_model))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
+
+# Creates unique "fingerprints" for each position
+# Advantage: Can handle sequences longer than seen in training
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.3 Multi-Head Attention</h2>
+            
+            <p>Instead of one attention mechanism, transformers use multiple "heads" that focus on different aspects:</p>
+
+            <div class="interactive-demo">
+                <h4>Why Multiple Heads?</h4>
+                <p>Different heads can specialize:</p>
+                <ul>
+                    <li><strong>Head 1:</strong> Subject-verb relationships</li>
+                    <li><strong>Head 2:</strong> Object-verb relationships</li>
+                    <li><strong>Head 3:</strong> Adjective-noun relationships</li>
+                    <li><strong>Head 4:</strong> Long-range dependencies</li>
+                </ul>
+            </div>
+
+            <h3>Implementation</h3>
+            <div class="interactive-demo">
+                <div class="code-block">
+                    <pre>
+# Instead of one set of Q, K, V matrices:
+class MultiHeadAttention:
+    def __init__(self, d_model=512, n_heads=8):
+        self.n_heads = n_heads
+        self.d_k = d_model // n_heads  # 64 dimensions per head
+        
+        # Separate Q, K, V for each head
+        self.W_q = [create_matrix(d_model, d_k) for _ in range(n_heads)]
+        self.W_k = [create_matrix(d_model, d_k) for _ in range(n_heads)]
+        self.W_v = [create_matrix(d_model, d_k) for _ in range(n_heads)]
+        
+        # Final projection
+        self.W_o = create_matrix(d_model, d_model)
+    
+    def forward(self, x):
+        # Run attention for each head
+        head_outputs = []
+        for i in range(self.n_heads):
+            Q_i = x @ self.W_q[i]
+            K_i = x @ self.W_k[i]  
+            V_i = x @ self.W_v[i]
+            
+            attention_i = self_attention(Q_i, K_i, V_i)
+            head_outputs.append(attention_i)
+        
+        # Concatenate all heads
+        concatenated = concat(head_outputs)  # Shape: (seq_len, d_model)
+        
+        # Final projection
+        output = concatenated @ self.W_o
+        return output
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.4 Layer Normalization</h2>
+            
+            <p>Layer normalization stabilizes training and helps the model learn faster:</p>
+
+            <div class="interactive-demo">
+                <h4>The Normalization Process</h4>
+                <div class="code-block">
+                    <pre>
+# For each layer, normalize across the feature dimension
+def layer_norm(x):
+    # x shape: (batch_size, seq_len, d_model)
+    
+    # Calculate mean and variance for each position
+    mean = x.mean(dim=-1, keepdim=True)
+    var = x.var(dim=-1, keepdim=True)
+    
+    # Normalize
+    normalized = (x - mean) / sqrt(var + epsilon)
+    
+    # Learnable scale and shift
+    output = gamma * normalized + beta
+    return output
+
+# Example:
+input = [[1, 2, 3, 4]]  # One position, 4 features
+mean = 2.5
+var = 1.25
+normalized = [[-1.34, -0.45, 0.45, 1.34]]  # Mean=0, Var=1
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Residual Connections</h3>
+            <div class="interactive-demo">
+                <p>The transformer uses "skip connections" to help gradients flow:</p>
+                <div class="code-block">
+                    <pre>
+# Instead of: output = layer(input)
+# We do: output = layer_norm(input + layer(input))
+
+def transformer_block(x):
+    # Multi-head attention with residual connection
+    attn_output = multi_head_attention(x)
+    x = layer_norm(x + attn_output)  # Add & Norm
+    
+    # Feed-forward with residual connection
+    ff_output = feed_forward(x)
+    x = layer_norm(x + ff_output)    # Add & Norm
+    
+    return x
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.5 Feed-Forward Networks</h2>
+            
+            <p>After attention, each position goes through a simple feed-forward network:</p>
+
+            <div class="interactive-demo">
+                <h4>Feed-Forward Structure</h4>
+                <div class="code-block">
+                    <pre>
+def feed_forward(x):
+    # Two linear transformations with ReLU in between
+    # Typically: d_model → 4*d_model → d_model
+    
+    hidden = x @ W1 + b1        # (512,) → (2048,)
+    activated = relu(hidden)     # Apply ReLU
+    output = activated @ W2 + b2 # (2048,) → (512,)
+    
+    return output
+
+# This happens independently for each position
+# Position-wise: same network applied to each word separately
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.6 Complete Transformer Block</h2>
+            
+            <div class="interactive-demo">
+                <h4>Putting It All Together</h4>
+                <div class="code-block">
+                    <pre>
+class TransformerBlock:
+    def __init__(self, d_model, n_heads, d_ff):
+        self.attention = MultiHeadAttention(d_model, n_heads)
+        self.feed_forward = FeedForward(d_model, d_ff)
+        self.layer_norm1 = LayerNorm(d_model)
+        self.layer_norm2 = LayerNorm(d_model)
+    
+    def forward(self, x):
+        # Step 1: Multi-head attention + residual + norm
+        attn_output = self.attention(x)
+        x = self.layer_norm1(x + attn_output)
+        
+        # Step 2: Feed-forward + residual + norm  
+        ff_output = self.feed_forward(x)
+        x = self.layer_norm2(x + ff_output)
+        
+        return x
+
+# The complete model stacks many of these blocks
+class Transformer:
+    def __init__(self, n_layers=12):
+        self.blocks = [TransformerBlock() for _ in range(n_layers)]
+    
+    def forward(self, x):
+        for block in self.blocks:
+            x = block(x)
+        return x
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.7 Decoder-Only Architecture (GPT Style)</h2>
+            
+            <p>GPT uses a simplified "decoder-only" architecture:</p>
+
+            <div class="interactive-demo">
+                <h4>Encoder vs Decoder vs Decoder-Only</h4>
+                <div class="code-block">
+                    <pre>
+Original Transformer (2017):
+Encoder: Processes input sequence (e.g., English sentence)
+Decoder: Generates output sequence (e.g., French translation)
+
+BERT (Encoder-only):
+Encoder: Processes text and learns representations
+Use: Classification, question answering, etc.
+
+GPT (Decoder-only):  
+Decoder: Generates text one token at a time
+Use: Text generation, completion, chatbots
+
+Key difference: GPT uses masked attention (can't see future tokens)
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Masked Self-Attention in Detail</h3>
+            <div class="interactive-demo">
+                <div class="code-block">
+                    <pre>
+# During training, we process entire sequences
+# But mask future positions to simulate generation
+
+def masked_attention(Q, K, V):
+    # Calculate attention scores
+    scores = Q @ K.T / sqrt(d_k)
+    
+    # Create mask (lower triangular matrix)
+    mask = [
+        [0,   -∞,  -∞,  -∞],  # Token 0: can only see itself
+        [0,    0,  -∞,  -∞],  # Token 1: can see 0,1
+        [0,    0,   0,  -∞],  # Token 2: can see 0,1,2  
+        [0,    0,   0,   0]   # Token 3: can see 0,1,2,3
+    ]
+    
+    # Apply mask (set future positions to -infinity)
+    masked_scores = scores + mask
+    
+    # Softmax (e^(-∞) = 0, so future positions get 0 attention)
+    attention_weights = softmax(masked_scores)
+    
+    return attention_weights @ V
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.8 Training vs Inference</h2>
+            
+            <div class="interactive-demo">
+                <h4>Two Different Modes</h4>
+                
+                <p><strong>Training (Teacher Forcing):</strong></p>
+                <div class="code-block">
+                    <pre>
+Input:  "The cat sat on the"
+Target: "cat sat on the mat"
+
+# Process entire sequence at once with masking
+# Each position predicts the next token
+# Very efficient: all predictions computed in parallel
+                    </pre>
+                </div>
+
+                <p><strong>Inference (Autoregressive Generation):</strong></p>
+                <div class="code-block">
+                    <pre>
+Step 1: Input "The"           → Predict "cat"
+Step 2: Input "The cat"       → Predict "sat"  
+Step 3: Input "The cat sat"   → Predict "on"
+Step 4: Input "The cat sat on" → Predict "the"
+Step 5: Input "The cat sat on the" → Predict "mat"
+
+# Must generate one token at a time
+# Each step requires a full forward pass
+                    </pre>
+                </div>
+            </div>
+
+            <h2>4.9 Key Architectural Choices</h2>
+            
+            <div class="interactive-demo">
+                <h4>Why These Design Decisions?</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Component</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Purpose</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Benefit</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Multi-Head Attention</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Different perspectives</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Captures diverse relationships</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Layer Normalization</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Stabilize training</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Faster convergence</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Residual Connections</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Gradient flow</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Enables deep networks</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Feed-Forward</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Non-linear processing</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Increases model capacity</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2>4.10 Scale and Parameters</h2>
+            
+            <div class="interactive-demo">
+                <h4>Transformer Sizes</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Model</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Layers</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Hidden Size</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Heads</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Parameters</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">GPT-1</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">12</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">768</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">12</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">117M</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">GPT-2</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">48</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">1600</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">25</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">1.5B</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">GPT-3</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">96</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">12288</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">96</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">175B</td>
+                    </tr>
+                </table>
+                <p>More parameters generally mean better performance, but also higher computational cost!</p>
+            </div>
+
+            <h2>4.11 Implementation Example</h2>
+            
+            <div class="interactive-demo">
+                <h4>Mini-Transformer in PyTorch</h4>
+                <div class="code-block">
+                    <pre>
+import torch
+import torch.nn as nn
+
+class MiniTransformer(nn.Module):
+    def __init__(self, vocab_size, d_model, n_heads, n_layers):
+        super().__init__()
+        
+        # Embeddings
+        self.token_embedding = nn.Embedding(vocab_size, d_model)
+        self.position_embedding = nn.Embedding(1000, d_model)  # Max seq len
+        
+        # Transformer blocks
+        self.blocks = nn.ModuleList([
+            TransformerBlock(d_model, n_heads) 
+            for _ in range(n_layers)
+        ])
+        
+        # Output head
+        self.ln_f = nn.LayerNorm(d_model)
+        self.head = nn.Linear(d_model, vocab_size)
+    
+    def forward(self, x):
+        # x shape: (batch, seq_len)
+        seq_len = x.size(1)
+        
+        # Embeddings
+        positions = torch.arange(seq_len)
+        x = self.token_embedding(x) + self.position_embedding(positions)
+        
+        # Transformer blocks
+        for block in self.blocks:
+            x = block(x)
+        
+        # Output
+        x = self.ln_f(x)
+        logits = self.head(x)  # (batch, seq_len, vocab_size)
+        
+        return logits
+
+# Usage
+model = MiniTransformer(vocab_size=50000, d_model=512, n_heads=8, n_layers=6)
+                    </pre>
+                </div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🎉 You've Built a Transformer!</h4>
+                <p>You now understand the complete transformer architecture. In the final chapter, we'll see how these transformers are trained and used to create powerful language models like GPT.</p>
+            </div>
+        </section>
+
+        <div class="chapter-nav">
+            <a href="attention.html" class="nav-button prev">← Previous: Attention Mechanism</a>
+            <a href="gpt-models.html" class="nav-button next">Next: GPT Models →</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Chapter 4 of 5 | Transformer Architecture</p>
+    </footer>
+
+    <script>
+        // Render math equations
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Mathematical Foundations | Transformers Tutorial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">🤖 Transformers Tutorial</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="math-basics.html" class="active">Math Basics</a></li>
+                <li><a href="neural-networks.html">Neural Networks</a></li>
+                <li><a href="attention.html">Attention</a></li>
+                <li><a href="transformers.html">Transformers</a></li>
+                <li><a href="gpt-models.html">GPT Models</a></li>
+                <li><a href="playground.html">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Chapter 1: Mathematical Foundations</h1>
+            <p class="subtitle">Building blocks of neural networks and transformers</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 17%;"></div>
+        </div>
+
+        <section class="intro">
+            <h2>Why Math Matters</h2>
+            <p>Before we dive into transformers, we need to understand the mathematical building blocks. Don't worry - we'll start simple and build up gradually!</p>
+            
+            <div class="concept-highlight">
+                <h4>🎯 What You'll Learn</h4>
+                <p>By the end of this chapter, you'll understand vectors, matrices, and the operations that make neural networks possible.</p>
+            </div>
+        </section>
+
+        <section class="chapters">
+            <h2>1.1 Understanding Vectors</h2>
+            
+            <p>A vector is simply a list of numbers. Think of it as coordinates in space or features of an object.</p>
+            
+            <div class="interactive-demo">
+                <h4>Example: Word Embeddings</h4>
+                <p>In language models, words are represented as vectors. For example:</p>
+                <ul>
+                    <li><strong>"cat"</strong> → [0.2, -0.1, 0.8, 0.3]</li>
+                    <li><strong>"dog"</strong> → [0.1, -0.2, 0.7, 0.4]</li>
+                    <li><strong>"car"</strong> → [-0.3, 0.9, -0.1, 0.2]</li>
+                </ul>
+                <p>Notice how "cat" and "dog" have similar numbers? That's because they're related concepts!</p>
+            </div>
+
+            <h3>Vector Operations</h3>
+            <p>Here are the basic operations we'll use:</p>
+            
+            <h4>1. Vector Addition</h4>
+            <p>Add corresponding elements:</p>
+            <div class="code-block">
+                <pre>
+Vector A = [1, 2, 3]
+Vector B = [4, 5, 6]
+A + B = [1+4, 2+5, 3+6] = [5, 7, 9]
+                </pre>
+            </div>
+
+            <h4>2. Scalar Multiplication</h4>
+            <p>Multiply each element by a number:</p>
+            <div class="code-block">
+                <pre>
+Vector A = [1, 2, 3]
+Scalar k = 2
+k * A = [2*1, 2*2, 2*3] = [2, 4, 6]
+                </pre>
+            </div>
+
+            <h4>3. Dot Product (Most Important!)</h4>
+            <p>This is crucial for understanding attention mechanisms:</p>
+            <div class="code-block">
+                <pre>
+Vector A = [1, 2, 3]
+Vector B = [4, 5, 6]
+A · B = (1*4) + (2*5) + (3*6) = 4 + 10 + 18 = 32
+                </pre>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🔑 Key Insight: Dot Product</h4>
+                <p>The dot product measures how similar two vectors are. Large positive values mean they're similar, values near zero mean they're unrelated, and negative values mean they're opposite.</p>
+            </div>
+
+            <h2>1.2 Understanding Matrices</h2>
+            
+            <p>A matrix is a rectangular array of numbers. Think of it as multiple vectors stacked together.</p>
+            
+            <div class="interactive-demo">
+                <h4>Example: Batch of Word Embeddings</h4>
+                <p>Instead of processing one word at a time, we can process multiple words together:</p>
+                <div class="code-block">
+                    <pre>
+Matrix of 3 words, each with 4 features:
+[
+  [0.2, -0.1,  0.8,  0.3],  ← "cat"
+  [0.1, -0.2,  0.7,  0.4],  ← "dog"  
+  [-0.3, 0.9, -0.1,  0.2]   ← "car"
+]
+                    </pre>
+                </div>
+            </div>
+
+            <h3>Matrix Dimensions</h3>
+            <p>Matrices are described by their dimensions: <strong>rows × columns</strong></p>
+            <ul>
+                <li>The matrix above is <strong>3 × 4</strong> (3 rows, 4 columns)</li>
+                <li>A vector is just a matrix with 1 row: <strong>1 × n</strong></li>
+            </ul>
+
+            <h2>1.3 Matrix Multiplication</h2>
+            
+            <p>This is the most important operation in neural networks. Let's understand it step by step.</p>
+
+            <div class="concept-highlight">
+                <h4>🎯 The Rule</h4>
+                <p>To multiply matrices A and B, the number of columns in A must equal the number of rows in B.</p>
+                <p><strong>A (m × n) × B (n × p) = C (m × p)</strong></p>
+            </div>
+
+            <h3>Example from the Video</h3>
+            <p>Let's recreate the example from timestamp ~51:00 in the video:</p>
+            
+            <div class="interactive-demo">
+                <h4>Matrix A (3×3) × Matrix B (3×2)</h4>
+                <div class="code-block">
+                    <pre>
+A = [                    B = [
+  [1, 1, 1],                 [2, 7],
+  [1, 1, 1],                 [6, 4],
+  [1, 1, 1]                  [6, 5]
+]                           ]
+
+Result C = A × B = [
+  [14, 16],  ← Row 1 of A · Each column of B
+  [14, 16],  ← Row 2 of A · Each column of B  
+  [14, 16]   ← Row 3 of A · Each column of B
+]
+                    </pre>
+                </div>
+                <p><strong>How we got [14, 16]:</strong></p>
+                <ul>
+                    <li>First element: (1×2) + (1×6) + (1×6) = 14</li>
+                    <li>Second element: (1×7) + (1×4) + (1×5) = 16</li>
+                </ul>
+            </div>
+
+            <h3>Why This Matters for Transformers</h3>
+            <p>Matrix multiplication is how transformers:</p>
+            <ul>
+                <li>Transform input words into different representations</li>
+                <li>Calculate attention weights</li>
+                <li>Combine information from different positions</li>
+                <li>Generate predictions</li>
+            </ul>
+
+            <h2>1.4 Practical Example: Averaging Vectors</h2>
+            
+            <p>Let's see how matrix multiplication can be used to average word embeddings (from video ~47:00):</p>
+
+            <div class="interactive-demo">
+                <h4>Averaging with Matrix Multiplication</h4>
+                <div class="code-block">
+                    <pre>
+# We have 3 words, each with 2 features
+X = [
+  [2, 7],  ← Word 1
+  [6, 4],  ← Word 2
+  [6, 5]   ← Word 3
+]
+
+# Average matrix (divides by 3)
+A = [
+  [1/3, 1/3, 1/3],
+  [1/3, 1/3, 1/3],
+  [1/3, 1/3, 1/3]
+]
+
+# Result: each row is the average of all input words
+Result = A × X = [
+  [4.67, 5.33],  ← Average of all 3 words
+  [4.67, 5.33],  ← Same average
+  [4.67, 5.33]   ← Same average
+]
+                    </pre>
+                </div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🔑 Key Insight</h4>
+                <p>By changing the matrix A, we can control how words influence each other. This is exactly what attention mechanisms do!</p>
+            </div>
+
+            <h2>1.5 Practice Exercises</h2>
+            
+            <div class="interactive-demo">
+                <h4>Exercise 1: Dot Product</h4>
+                <p>Calculate the dot product of [1, 3, 5] and [2, 4, 6]</p>
+                <details>
+                    <summary>Click for answer</summary>
+                    <p>(1×2) + (3×4) + (5×6) = 2 + 12 + 30 = 44</p>
+                </details>
+            </div>
+
+            <div class="interactive-demo">
+                <h4>Exercise 2: Matrix Multiplication</h4>
+                <p>What's the result of multiplying these matrices?</p>
+                <div class="code-block">
+                    <pre>
+A = [[2, 1],     B = [[1, 0],
+     [3, 4]]          [2, 1]]
+                    </pre>
+                </div>
+                <details>
+                    <summary>Click for answer</summary>
+                    <div class="code-block">
+                        <pre>
+Result = [[4, 1],
+          [11, 4]]
+
+Calculation:
+- Top-left: (2×1) + (1×2) = 4
+- Top-right: (2×0) + (1×1) = 1  
+- Bottom-left: (3×1) + (4×2) = 11
+- Bottom-right: (3×0) + (4×1) = 4
+                        </pre>
+                    </div>
+                </details>
+            </div>
+
+            <h2>1.6 Connection to Transformers</h2>
+            
+            <p>Now you understand the math! Here's how these concepts connect to transformers:</p>
+            
+            <ul>
+                <li><strong>Vectors:</strong> Each word becomes a vector (embedding)</li>
+                <li><strong>Dot Products:</strong> Measure similarity between words (attention)</li>
+                <li><strong>Matrix Multiplication:</strong> Transform and combine information</li>
+                <li><strong>Averaging:</strong> Early example of how words can influence each other</li>
+            </ul>
+
+            <div class="concept-highlight">
+                <h4>🎉 Congratulations!</h4>
+                <p>You now understand the mathematical foundation of transformers. In the next chapter, we'll see how these operations are used in neural networks.</p>
+            </div>
+        </section>
+
+        <div class="chapter-nav">
+            <a href="index.html" class="nav-button prev">← Back to Home</a>
+            <a href="neural-networks.html" class="nav-button next">Next: Neural Networks →</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Chapter 1 of 5 | Mathematical Foundations</p>
+    </footer>
+
+    <script>
+        // Render math equations
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

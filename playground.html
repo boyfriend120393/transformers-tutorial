@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Playground | Transformers Tutorial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">🤖 Transformers Tutorial</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="math-basics.html">Math Basics</a></li>
+                <li><a href="neural-networks.html">Neural Networks</a></li>
+                <li><a href="attention.html">Attention</a></li>
+                <li><a href="transformers.html">Transformers</a></li>
+                <li><a href="gpt-models.html">GPT Models</a></li>
+                <li><a href="playground.html" class="active">Playground</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Interactive Playground</h1>
+            <p class="subtitle">Experiment with transformer concepts</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%;"></div>
+        </div>
+
+        <section class="intro">
+            <h2>Hands-On Learning</h2>
+            <p>Now that you understand the theory, let's experiment! These interactive demos let you see transformer concepts in action.</p>
+        </section>
+
+        <section class="chapters">
+            <h2>1. Dot Product Calculator</h2>
+            
+            <div class="interactive-demo">
+                <h4>Calculate Dot Products</h4>
+                <p>Experiment with the fundamental operation behind attention:</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="vector1">Vector 1:</label>
+                        <input type="text" id="vector1" value="1,2,3" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                    <div>
+                        <label for="vector2">Vector 2:</label>
+                        <input type="text" id="vector2" value="4,5,6" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                </div>
+                
+                <button onclick="calculateDotProduct()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem;">Calculate Dot Product</button>
+                
+                <div id="dotProductResult" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;"></div>
+            </div>
+
+            <h2>2. Softmax Visualizer</h2>
+            
+            <div class="interactive-demo">
+                <h4>See How Softmax Creates Probabilities</h4>
+                <p>Watch how raw scores become attention weights:</p>
+                
+                <label for="softmaxInput">Input scores (comma-separated):</label>
+                <input type="text" id="softmaxInput" value="2.0,1.0,0.1" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                
+                <button onclick="calculateSoftmax()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem;">Apply Softmax</button>
+                
+                <div id="softmaxResult" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;"></div>
+                
+                <div id="softmaxChart" style="height: 200px; margin-top: 1rem;"></div>
+            </div>
+
+            <h2>3. Attention Weight Visualizer</h2>
+            
+            <div class="interactive-demo">
+                <h4>Visualize Attention Patterns</h4>
+                <p>See how words attend to each other:</p>
+                
+                <label for="sentence">Enter a sentence:</label>
+                <input type="text" id="sentence" value="The cat sat on the mat" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                
+                <button onclick="generateAttention()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem;">Generate Attention</button>
+                
+                <div id="attentionMatrix" style="margin-top: 1rem;"></div>
+            </div>
+
+            <h2>4. Matrix Multiplication Demo</h2>
+            
+            <div class="interactive-demo">
+                <h4>Interactive Matrix Multiplication</h4>
+                <p>See how matrix operations work step by step:</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="matrixA">Matrix A (rows separated by ;):</label>
+                        <textarea id="matrixA" rows="3" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">1,2;3,4</textarea>
+                    </div>
+                    <div>
+                        <label for="matrixB">Matrix B (rows separated by ;):</label>
+                        <textarea id="matrixB" rows="3" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">5,6;7,8</textarea>
+                    </div>
+                </div>
+                
+                <button onclick="multiplyMatrices()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem;">Multiply Matrices</button>
+                
+                <div id="matrixResult" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;"></div>
+            </div>
+
+            <h2>5. Text Generation Simulator</h2>
+            
+            <div class="interactive-demo">
+                <h4>Simulate GPT-style Text Generation</h4>
+                <p>See how autoregressive generation works:</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="prompt">Starting prompt:</label>
+                        <input type="text" id="prompt" value="The weather is" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                    <div>
+                        <label for="temperature">Temperature (0.1-2.0):</label>
+                        <input type="number" id="temperature" value="0.8" min="0.1" max="2.0" step="0.1" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                </div>
+                
+                <button onclick="generateText()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem;">Generate Text</button>
+                
+                <div id="generationSteps" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;"></div>
+            </div>
+
+            <h2>6. Transformer Architecture Explorer</h2>
+            
+            <div class="interactive-demo">
+                <h4>Explore Model Configurations</h4>
+                <p>See how different parameters affect model size:</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="nLayers">Number of Layers:</label>
+                        <input type="number" id="nLayers" value="12" min="1" max="100" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                    <div>
+                        <label for="hiddenSize">Hidden Size:</label>
+                        <input type="number" id="hiddenSize" value="768" min="64" max="4096" step="64" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                    <div>
+                        <label for="nHeads">Number of Heads:</label>
+                        <input type="number" id="nHeads" value="12" min="1" max="32" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                    <div>
+                        <label for="vocabSize">Vocab Size:</label>
+                        <input type="number" id="vocabSize" value="50000" min="1000" max="100000" step="1000" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                    </div>
+                </div>
+                
+                <button onclick="calculateModelSize()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem;">Calculate Model Size</button>
+                
+                <div id="modelStats" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;"></div>
+            </div>
+
+            <div class="concept-highlight">
+                <h4>🎉 Tutorial Complete!</h4>
+                <p>Congratulations! You've completed your journey from simple math to understanding transformers. You now have the foundation to explore AI, build your own models, and contribute to this exciting field!</p>
+            </div>
+        </section>
+
+        <div class="chapter-nav">
+            <a href="gpt-models.html" class="nav-button prev">← Previous: GPT Models</a>
+            <a href="index.html" class="nav-button next">Back to Home →</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Interactive Playground | Transformers Tutorial Complete!</p>
+    </footer>
+
+    <script>
+        // Dot Product Calculator
+        function calculateDotProduct() {
+            const v1 = document.getElementById('vector1').value.split(',').map(x => parseFloat(x.trim()));
+            const v2 = document.getElementById('vector2').value.split(',').map(x => parseFloat(x.trim()));
+            
+            if (v1.length !== v2.length) {
+                document.getElementById('dotProductResult').innerHTML = 
+                    '<p style="color: red;">Error: Vectors must have the same length!</p>';
+                return;
+            }
+            
+            let dotProduct = 0;
+            let calculation = '';
+            
+            for (let i = 0; i < v1.length; i++) {
+                dotProduct += v1[i] * v2[i];
+                calculation += `(${v1[i]} × ${v2[i]})`;
+                if (i < v1.length - 1) calculation += ' + ';
+            }
+            
+            document.getElementById('dotProductResult').innerHTML = `
+                <h4>Calculation:</h4>
+                <p>${calculation} = ${dotProduct}</p>
+                <h4>Interpretation:</h4>
+                <p>Dot product: <strong>${dotProduct}</strong><br>
+                ${dotProduct > 0 ? 'Positive: Vectors point in similar directions' : 
+                  dotProduct < 0 ? 'Negative: Vectors point in opposite directions' : 
+                  'Zero: Vectors are orthogonal (perpendicular)'}
+                </p>
+            `;
+        }
+
+        // Softmax Calculator
+        function calculateSoftmax() {
+            const scores = document.getElementById('softmaxInput').value.split(',').map(x => parseFloat(x.trim()));
+            
+            // Calculate softmax
+            const maxScore = Math.max(...scores);
+            const expScores = scores.map(x => Math.exp(x - maxScore)); // Numerical stability
+            const sumExp = expScores.reduce((a, b) => a + b, 0);
+            const softmax = expScores.map(x => x / sumExp);
+            
+            let result = '<h4>Results:</h4>';
+            result += '<table style="width: 100%; border-collapse: collapse;">';
+            result += '<tr style="background: #e2e8f0;"><th style="padding: 8px; border: 1px solid #cbd5e0;">Input</th><th style="padding: 8px; border: 1px solid #cbd5e0;">Softmax</th><th style="padding: 8px; border: 1px solid #cbd5e0;">Percentage</th></tr>';
+            
+            for (let i = 0; i < scores.length; i++) {
+                result += `<tr><td style="padding: 8px; border: 1px solid #cbd5e0;">${scores[i]}</td><td style="padding: 8px; border: 1px solid #cbd5e0;">${softmax[i].toFixed(4)}</td><td style="padding: 8px; border: 1px solid #cbd5e0;">${(softmax[i] * 100).toFixed(1)}%</td></tr>`;
+            }
+            result += '</table>';
+            result += `<p style="margin-top: 1rem;"><strong>Sum:</strong> ${softmax.reduce((a, b) => a + b, 0).toFixed(4)} (should be 1.0)</p>`;
+            
+            document.getElementById('softmaxResult').innerHTML = result;
+        }
+
+        // Attention Matrix Generator
+        function generateAttention() {
+            const sentence = document.getElementById('sentence').value;
+            const words = sentence.split(' ');
+            const n = words.length;
+            
+            // Generate random attention weights (normalized)
+            let matrix = '';
+            matrix += '<h4>Attention Matrix:</h4>';
+            matrix += '<table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">';
+            
+            // Header row
+            matrix += '<tr><th style="padding: 8px; border: 1px solid #cbd5e0;"></th>';
+            for (let j = 0; j < n; j++) {
+                matrix += `<th style="padding: 8px; border: 1px solid #cbd5e0;">${words[j]}</th>`;
+            }
+            matrix += '</tr>';
+            
+            // Data rows
+            for (let i = 0; i < n; i++) {
+                matrix += `<tr><th style="padding: 8px; border: 1px solid #cbd5e0;">${words[i]}</th>`;
+                
+                // Generate attention weights for this word
+                let weights = [];
+                for (let j = 0; j <= i; j++) { // Causal masking
+                    weights.push(Math.random());
+                }
+                
+                // Normalize weights
+                const sum = weights.reduce((a, b) => a + b, 0);
+                weights = weights.map(w => w / sum);
+                
+                // Fill the row
+                for (let j = 0; j < n; j++) {
+                    if (j <= i) {
+                        const weight = weights[j];
+                        const intensity = Math.floor(weight * 255);
+                        const color = `rgba(102, 126, 234, ${weight})`;
+                        matrix += `<td style="padding: 8px; border: 1px solid #cbd5e0; background: ${color}; text-align: center;">${weight.toFixed(2)}</td>`;
+                    } else {
+                        matrix += `<td style="padding: 8px; border: 1px solid #cbd5e0; background: #f5f5f5; text-align: center;">0.00</td>`;
+                    }
+                }
+                matrix += '</tr>';
+            }
+            matrix += '</table>';
+            matrix += '<p style="margin-top: 1rem;"><em>Note: Darker blue = higher attention. Future positions are masked (causal attention).</em></p>';
+            
+            document.getElementById('attentionMatrix').innerHTML = matrix;
+        }
+
+        // Matrix Multiplication
+        function multiplyMatrices() {
+            try {
+                const matrixAText = document.getElementById('matrixA').value;
+                const matrixBText = document.getElementById('matrixB').value;
+                
+                const matrixA = matrixAText.split(';').map(row => row.split(',').map(x => parseFloat(x.trim())));
+                const matrixB = matrixBText.split(';').map(row => row.split(',').map(x => parseFloat(x.trim())));
+                
+                if (matrixA[0].length !== matrixB.length) {
+                    throw new Error('Matrix A columns must equal Matrix B rows');
+                }
+                
+                const result = [];
+                for (let i = 0; i < matrixA.length; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < matrixB[0].length; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < matrixB.length; k++) {
+                            sum += matrixA[i][k] * matrixB[k][j];
+                        }
+                        result[i][j] = sum;
+                    }
+                }
+                
+                let output = '<h4>Result:</h4>';
+                output += `<p><strong>A (${matrixA.length}×${matrixA[0].length}) × B (${matrixB.length}×${matrixB[0].length}) = C (${result.length}×${result[0].length})</strong></p>`;
+                output += '<pre style="background: white; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">';
+                for (let i = 0; i < result.length; i++) {
+                    output += '[' + result[i].map(x => x.toFixed(2)).join(', ') + ']\n';
+                }
+                output += '</pre>';
+                
+                document.getElementById('matrixResult').innerHTML = output;
+            } catch (error) {
+                document.getElementById('matrixResult').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Text Generation Simulator
+        function generateText() {
+            const prompt = document.getElementById('prompt').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            
+            // Simple vocabulary for demo
+            const vocab = ['nice', 'sunny', 'cloudy', 'rainy', 'cold', 'warm', 'today', 'tomorrow', 'yesterday', '.', '!'];
+            
+            let output = '<h4>Generation Steps:</h4>';
+            let currentText = prompt;
+            
+            for (let step = 0; step < 5; step++) {
+                // Simulate probability distribution
+                let probs = vocab.map(() => Math.random());
+                
+                // Apply temperature
+                probs = probs.map(p => Math.pow(p, 1/temperature));
+                
+                // Normalize
+                const sum = probs.reduce((a, b) => a + b, 0);
+                probs = probs.map(p => p / sum);
+                
+                // Sample from distribution
+                const rand = Math.random();
+                let cumSum = 0;
+                let selectedWord = vocab[0];
+                
+                for (let i = 0; i < vocab.length; i++) {
+                    cumSum += probs[i];
+                    if (rand <= cumSum) {
+                        selectedWord = vocab[i];
+                        break;
+                    }
+                }
+                
+                currentText += ' ' + selectedWord;
+                
+                output += `<div style="border-left: 3px solid #667eea; padding-left: 1rem; margin: 1rem 0;">`;
+                output += `<p><strong>Step ${step + 1}:</strong> "${currentText}"</p>`;
+                output += `<p style="font-size: 0.9em; color: #666;">Selected: "${selectedWord}" (temp=${temperature})</p>`;
+                output += '</div>';
+                
+                if (selectedWord === '.' || selectedWord === '!') break;
+            }
+            
+            document.getElementById('generationSteps').innerHTML = output;
+        }
+
+        // Model Size Calculator
+        function calculateModelSize() {
+            const nLayers = parseInt(document.getElementById('nLayers').value);
+            const hiddenSize = parseInt(document.getElementById('hiddenSize').value);
+            const nHeads = parseInt(document.getElementById('nHeads').value);
+            const vocabSize = parseInt(document.getElementById('vocabSize').value);
+            
+            // Calculate parameters
+            const embeddingParams = vocabSize * hiddenSize;
+            const positionalParams = 1000 * hiddenSize; // Assume max sequence length 1000
+            
+            // Per layer parameters
+            const attentionParams = 4 * hiddenSize * hiddenSize; // Q, K, V, O matrices
+            const layerNormParams = 2 * hiddenSize; // 2 layer norms per block
+            const ffnParams = 2 * hiddenSize * (4 * hiddenSize); // Typical FFN is 4x hidden size
+            
+            const perLayerParams = attentionParams + layerNormParams + ffnParams;
+            const totalLayerParams = nLayers * perLayerParams;
+            
+            const totalParams = embeddingParams + positionalParams + totalLayerParams;
+            
+            // Calculate memory
+            const memoryGB = (totalParams * 4) / (1024 * 1024 * 1024); // 4 bytes per parameter (float32)
+            
+            let output = '<h4>Model Statistics:</h4>';
+            output += '<table style="width: 100%; border-collapse: collapse;">';
+            output += '<tr style="background: #f8f9fa;"><th style="padding: 10px; border: 1px solid #ddd;">Component</th><th style="padding: 10px; border: 1px solid #ddd;">Parameters</th></tr>';
+            output += `<tr><td style="padding: 10px; border: 1px solid #ddd;">Token Embeddings</td><td style="padding: 10px; border: 1px solid #ddd;">${embeddingParams.toLocaleString()}</td></tr>`;
+            output += `<tr><td style="padding: 10px; border: 1px solid #ddd;">Position Embeddings</td><td style="padding: 10px; border: 1px solid #ddd;">${positionalParams.toLocaleString()}</td></tr>`;
+            output += `<tr><td style="padding: 10px; border: 1px solid #ddd;">Transformer Layers (${nLayers})</td><td style="padding: 10px; border: 1px solid #ddd;">${totalLayerParams.toLocaleString()}</td></tr>`;
+            output += `<tr style="background: #f8f9fa; font-weight: bold;"><td style="padding: 10px; border: 1px solid #ddd;">Total Parameters</td><td style="padding: 10px; border: 1px solid #ddd;">${totalParams.toLocaleString()}</td></tr>`;
+            output += '</table>';
+            
+            output += '<h4 style="margin-top: 1.5rem;">Memory Requirements:</h4>';
+            output += `<p><strong>Model Storage:</strong> ${memoryGB.toFixed(2)} GB</p>`;
+            output += `<p><strong>Training Memory:</strong> ~${(memoryGB * 4).toFixed(2)} GB (with gradients & optimizer states)</p>`;
+            
+            // Compare to known models
+            output += '<h4 style="margin-top: 1.5rem;">Comparison:</h4>';
+            if (totalParams < 200000000) {
+                output += '<p>📱 <strong>Small model</strong> - Similar to GPT-1 (117M parameters)</p>';
+            } else if (totalParams < 2000000000) {
+                output += '<p>💻 <strong>Medium model</strong> - Similar to GPT-2 (1.5B parameters)</p>';
+            } else {
+                output += '<p>🏢 <strong>Large model</strong> - Approaching GPT-3 scale (175B parameters)</p>';
+            }
+            
+            document.getElementById('modelStats').innerHTML = output;
+        }
+
+        // Initialize with default calculations
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateDotProduct();
+            calculateSoftmax();
+            generateAttention();
+        });
+    </script>
+</body>
+</html>
